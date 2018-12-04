@@ -2,14 +2,24 @@ package com.geren.kevin.knockbricks.main.bean;
 
 public class Block {
 
+    private int id;
     private int x;
     private int y;
     private int value;
 
-    public Block(int x, int y, int value) {
+    public Block(int id, int x, int y, int value) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.value = value;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getX() {
@@ -39,7 +49,8 @@ public class Block {
     @Override
     public String toString() {
         return "Block{" +
-                "x=" + x +
+                "id=" + id +
+                ", x=" + x +
                 ", y=" + y +
                 ", value=" + value +
                 '}';

@@ -2,32 +2,31 @@ package com.geren.kevin.knockbricks.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.geren.kevin.knockbricks.main.bean.Block;
 import com.geren.kevin.knockbricks.utils.TransformUtils;
 
-public class Chessboard extends View {
+/**
+ * 棋盘
+ */
+public class Chessboard extends ViewGroup implements View.OnClickListener {
 
-    public static final String TAG = Chessboard.class.getSimpleName();
+    public static final String TAG = "Chessboard";
 
-    private ClickListener clickListener;
+    private ChessBoardClickListener listener;
 
-    //画笔
-    private Paint paint;
-    //数据
-    private Block[][] data;
-    //尺寸
-    private int size = 1;
-    private int row = 1;
-    private int paintWith;
     private Context context;
+    private Block[][] data;
+    private int rowNumber;
+    private int rowWith;
+    private int boxWidth;
+
+    private Paint mPaint;
 
     public Chessboard(Context context) {
         this(context, null);
@@ -35,109 +34,102 @@ public class Chessboard extends View {
 
     public Chessboard(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        this.context = context;
     }
 
     public Chessboard(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.context = context;
-        data = new Block[100][100];
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paintWith = 1;
-        paint.setStrokeWidth(paintWith);
+        setWillNotDraw(false);//调用ondraw方法
+        this.rowNumber = 1;
+        data = new Block[rowNumber][rowNumber];
+        mPaint = new Paint();
     }
 
-    public void setOnBoardClickListener(ClickListener listener) {
-        this.clickListener = listener;
+    //设置数据，重绘
+    public void setData(int rowNumber, Block[][] blocks) {
+        removeAllViews();
+        Log.e(TAG, "加载数据");
+        this.rowNumber = rowNumber;
+        this.data = blocks;
+        for (int i = 0; i < rowNumber; i++) {
+            for (int j = 0; j < rowNumber; j++) {
+                Brick brick = new Brick(context);
+                brick.initBrick(data[i][j]);
+                addView(brick);
+            }
+        }
+        this.invalidate();
     }
 
-
+    /**
+     * 计算所有ChildView的宽度和高度 然后根据ChildView的计算结果，设置自己的宽和高
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int sizeSpec = widthMeasureSpec > heightMeasureSpec ? heightMeasureSpec : widthMeasureSpec;
-        super.onMeasure(sizeSpec, sizeSpec);
+        int rowWith = widthMeasureSpec > heightMeasureSpec ? heightMeasureSpec : widthMeasureSpec;
+        super.onMeasure(rowWith, rowWith);
+        int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
+        this.rowWith = sizeWidth > sizeHeight ? sizeHeight : sizeWidth;
+        this.boxWidth = ((Float) ((rowWith - ((float) TransformUtils.px2dip(context, mPaint.getStrokeWidth()))) / rowNumber)).intValue();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-    }
+        int childCount = getChildCount();
+        if (childCount > 0) {
+            Log.e(TAG, "childCount= " + childCount);
+            for (int i = 0; i < rowNumber; i++) {//行
+                for (int j = 0; j < rowNumber; j++) {//列
+                    int index = rowNumber * j + i;
+                    Log.i(TAG, "rowNumber=" + rowNumber + ",i=" + i + ",j=" + j + ",我是卡片，我的下标为》》》" + index);
+                    Brick brick = (Brick) getChildAt(index);
+//                    brick.setLeft(108 * j);
+//                    brick.setTop(108 * i);
+//                    brick.setRight(108 * (j + 1));
+//                    brick.setBottom(108 * (i + 1));
+                    //
+                    brick.setTop(108 * i);
+                    brick.setBottom(108 * (i + 1));
+                    brick.setLeft(108 * j);
+                    brick.setRight(108 * (j + 1));
 
-    //设置数据
-    public void setData(Block[][] data, int row) {
-
-        int width = getWidth();
-        int height = getHeight();
-        this.size = width > height ? height : width;
-        this.row = row;
-        this.data = data;
-        //重绘
-        this.invalidate();
+                    brick.setOnClickListener(this);
+                }
+            }
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //
-        canvas.drawColor(Color.GREEN);
-        //
-        int paintWith2dip = TransformUtils.px2dip(context, paintWith);
-        int boxWidth = (size - (paintWith2dip * (row))) / (row);
-
-        //画网格
-        paint.setColor(Color.GRAY);
-        for (int i = 0; i <= row; i++) {//画横线
-            canvas.drawLine(paintWith2dip * 2, boxWidth * i, size, boxWidth * i, paint);
-        }
-        for (int i = 0; i <= row; i++) {//画竖线
-            canvas.drawLine(boxWidth * i, paintWith2dip * 2, boxWidth * i, size, paint);
-        }
-
-        //画棋子图片
-        for (int i = 0; i < data.length; i++) {
-            Block[] datum = data[i];
-            for (int j = 0; j < datum.length; j++) {
-                Block block = datum[j];
-                int value = 0;
-                try {
-                    value = block.getValue();
-                } catch (Exception e) {
-                    value = 1;
-                }
-                switch (value) {
-                    case 1:
-                        paint.setColor(Color.BLUE);
-                        break;
-                    case 2:
-                        paint.setColor(Color.YELLOW);
-                        break;
-                    case 3:
-                        paint.setColor(Color.RED);
-                        break;
-                }
-                int x = boxWidth * i + boxWidth / 2;
-                int y = boxWidth * j + boxWidth / 2;
-                paint.setTextSize(50);
-                paint.setTextAlign(Paint.Align.CENTER);
-                paint.setTypeface(Typeface.DEFAULT_BOLD);
-                canvas.drawText("" + value, x, y, paint);
-
-            }
-        }
-    }
-
-    public interface ClickListener {
-        void chessClicked(Block block);
+//        mPaint.setColor(Color.RED);
+//        mPaint.setStrokeWidth(1);
+////        Log.e(TAG, "boxWidth=" + boxWidth);
+//        //画网格
+//        for (int i = 0; i <= rowNumber; i++) {//横线
+////            Log.e(TAG, "boxWidth=" + boxWidth + ",i=" + i + ",boxWidth * i=" + boxWidth * i);
+//            canvas.drawLine(0, boxWidth * i, rowWith, boxWidth * i, mPaint);
+//        }
+//        for (int j = 0; j <= rowNumber; j++) {//竖线
+//            canvas.drawLine(boxWidth * j, 0, boxWidth * j, rowWith, mPaint);
+//        }
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        float rawX = event.getRawX();
-        float rawY = event.getRawY();
-        Log.e(TAG, "rawX: " + rawX + ",rawY:" + rawY);
+    public void onClick(View v) {
+        Brick brick = (Brick) v;
+        Block block = brick.getBlock();
+        if (listener != null) {
+            listener.chessboardClicked(block);
+        }
+    }
 
-//        rawX/
+    public void setOnChessBoardClickListener(ChessBoardClickListener listener) {
+        this.listener = listener;
+    }
 
-        return true;
+    public interface ChessBoardClickListener {
+        void chessboardClicked(Block block);
     }
 }

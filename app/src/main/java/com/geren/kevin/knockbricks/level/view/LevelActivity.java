@@ -13,7 +13,8 @@ import com.geren.kevin.knockbricks.level.adapters.LevelRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LevelActivity extends AppCompatActivity implements LevelRecyclerViewAdapter.LevelAdapterClickedListener {
+public class LevelActivity extends AppCompatActivity
+        implements LevelRecyclerViewAdapter.LevelAdapterClickedListener {
 
     public static final String TAG = LevelActivity.class.getSimpleName();
     private RecyclerView myRecycler;

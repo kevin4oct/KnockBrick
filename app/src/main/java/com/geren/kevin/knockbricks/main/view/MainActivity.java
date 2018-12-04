@@ -15,9 +15,9 @@ import com.geren.kevin.knockbricks.main.bean.Block;
 import com.geren.kevin.knockbricks.main.presenter.MainPresenter;
 import com.geren.kevin.knockbricks.views.Chessboard;
 
-public class MainActivity extends AppCompatActivity implements IMainView, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements IMainView, View.OnClickListener, Chessboard.ChessBoardClickListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = "MainActivity";
     private MainPresenter presenter;
 
     private TextView tv;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements IMainView, View.O
         Intent intent = getIntent();
         level = intent.getIntExtra("level", 0);
         dataSize = 10;
-        dataNumber = 3;
+        dataNumber = 5;
         presenter = new MainPresenter(this);
         presenter.initData(dataSize, dataNumber);
     }
@@ -75,21 +75,16 @@ public class MainActivity extends AppCompatActivity implements IMainView, View.O
         btn_reset.setOnClickListener(this);
         btn_last.setOnClickListener(this);
         btn_hummer.setOnClickListener(this);
+        chessboard.setOnChessBoardClickListener(this);
     }
 
     //设置数据
     @Override
     public void setData(Block[][] data) {
-        Log.e(TAG, "设置数据" + data.toString());
-//        for (int i = 0; i < 10; i++) {
-//            for (int j = 0; j < 10; j++) {
-//                Log.e(TAG, data[i][j].toString());
-//            }
-//        }
         if (chessboard == null) {
             Log.e(TAG, "棋盘是空的");
         } else {
-            chessboard.setData(data, dataSize);
+            chessboard.setData(dataSize, data);
         }
     }
 
@@ -103,8 +98,14 @@ public class MainActivity extends AppCompatActivity implements IMainView, View.O
                 Toast.makeText(this, "锤子", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn_main_last:
-                Toast.makeText(this, "上一步", Toast.LENGTH_SHORT).show();
+                presenter.lastData();
                 break;
         }
+    }
+
+    @Override
+    public void chessboardClicked(Block block) {
+        Toast.makeText(this, block.toString(), Toast.LENGTH_SHORT).show();
+        presenter.knock(block);
     }
 }
