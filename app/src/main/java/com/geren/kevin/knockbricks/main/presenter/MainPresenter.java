@@ -20,6 +20,9 @@ public class MainPresenter {
     private int dataSize;//数组的大小
     private int dataNumber;//数据类型数量
 
+    private List<Integer> ids = new ArrayList<>();//点击后记录颜色块的id的容器
+    private int value;//点击的块的value
+
     public MainPresenter(MainActivity activity) {
         this.activity = activity;
     }
@@ -78,9 +81,12 @@ public class MainPresenter {
         getIds(block);
         drawBlack();
 
-        //
-//        nowData[block.getX()][block.getY()].setValue(0);
+
         activity.setData(nowData);
+
+    }
+
+    private void setRow() {
 
     }
 
@@ -98,18 +104,12 @@ public class MainPresenter {
         }
     }
 
-    private List<Integer> ids = new ArrayList<>();
-    private int value;
 
     //获取周围相同value的id集合
     private void getIds(Block block) {
-
         ids.clear();
-        ids.add(block.getId());
         value = block.getValue();
-
         digui(block);
-
     }
 
     private void digui(Block block) {
@@ -119,28 +119,50 @@ public class MainPresenter {
         Block leftBlock = getLeftBlock(block);
         Block rightBlock = getRightBlock(block);
 
+        boolean isT = false;
+        boolean isB = false;
+        boolean isL = false;
+        boolean isR = false;
+
         if (topBlock != null) {
             int id = topBlock.getId();
-            if (shoudAdd(topBlock)) {
+            isT = shoudAdd(topBlock);
+            if (isT) {
                 ids.add(id);
             }
         }
         if (bottomBlock != null) {
             int id = bottomBlock.getId();
-            if (shoudAdd(bottomBlock)) {
+            isB = shoudAdd(bottomBlock);
+            if (isB) {
                 ids.add(id);
             }
         }
         if (leftBlock != null) {
             int id = leftBlock.getId();
-            if (shoudAdd(leftBlock)) {
+            isL = shoudAdd(leftBlock);
+            if (isL) {
                 ids.add(id);
             }
         }
         if (leftBlock != null) {
-            if (shoudAdd(rightBlock)) {
+            isR = shoudAdd(rightBlock);
+            if (isR) {
                 ids.add(rightBlock.getId());
             }
+        }
+        //递归
+        if (isT) {
+            digui(topBlock);
+        }
+        if (isB) {
+            digui(bottomBlock);
+        }
+        if (isL) {
+            digui(leftBlock);
+        }
+        if (isR) {
+            digui(rightBlock);
         }
 
     }
