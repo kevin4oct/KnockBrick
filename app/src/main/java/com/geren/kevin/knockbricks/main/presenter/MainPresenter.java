@@ -20,7 +20,7 @@ public class MainPresenter {
     private int dataSize;//数组的大小
     private int dataNumber;//数据类型数量
 
-    private List<Integer> ids = new ArrayList<>();//点击后记录颜色块的id的容器
+    private List<Block> clickedList = new ArrayList<>();//点击后记录颜色块的id的容器
     private int value;//点击的块的value
 
     public MainPresenter(MainActivity activity) {
@@ -81,21 +81,44 @@ public class MainPresenter {
         getIds(block);
         drawBlack();
 
+//        setRow();
 
         activity.setData(nowData);
 
     }
 
+    //将value==0的放在最上边去
     private void setRow() {
+        for (int i = 0; i < clickedList.size(); i++) {
+// TODO: 2018/12/4
+            Block block = clickedList.get(i);
+            int x = block.getX();
+            int y = block.getY();
+            for (int j = 0; j <= y; j++) {
+                if (j < y) {
+                    nowData[x][j].setValue(nowData[x][j + 1].getValue());
+                } else {
+                    int m = 0;
+                    while (true) {
+                        int value = nowData[x][m].getValue();
+                        if (value != 0) {
+                            nowData[x][m].setValue(0);
+                            break;
+                        }
+                        m++;
+                    }
+                }
+            }
 
+        }
     }
 
     //测试，将ids中的black弄黑
     private void drawBlack() {
         for (int i = 0; i < dataSize; i++) {
             for (int j = 0; j < dataSize; j++) {
-                for (int k = 0; k < ids.size(); k++) {
-                    int id = ids.get(k);
+                for (int k = 0; k < clickedList.size(); k++) {
+                    int id = clickedList.get(k).getId();
                     if (nowData[i][j].getId() == id) {
                         nowData[i][j].setValue(0);
                     }
@@ -107,7 +130,7 @@ public class MainPresenter {
 
     //获取周围相同value的id集合
     private void getIds(Block block) {
-        ids.clear();
+        clickedList.clear();
         value = block.getValue();
         digui(block);
     }
@@ -125,30 +148,27 @@ public class MainPresenter {
         boolean isR = false;
 
         if (topBlock != null) {
-            int id = topBlock.getId();
             isT = shoudAdd(topBlock);
             if (isT) {
-                ids.add(id);
+                clickedList.add(topBlock);
             }
         }
         if (bottomBlock != null) {
-            int id = bottomBlock.getId();
             isB = shoudAdd(bottomBlock);
             if (isB) {
-                ids.add(id);
+                clickedList.add(bottomBlock);
             }
         }
         if (leftBlock != null) {
-            int id = leftBlock.getId();
             isL = shoudAdd(leftBlock);
             if (isL) {
-                ids.add(id);
+                clickedList.add(leftBlock);
             }
         }
         if (leftBlock != null) {
             isR = shoudAdd(rightBlock);
             if (isR) {
-                ids.add(rightBlock.getId());
+                clickedList.add(leftBlock);
             }
         }
         //递归
@@ -169,9 +189,8 @@ public class MainPresenter {
 
     private boolean shoudAdd(Block block) {
         if (block != null) {
-            int id = block.getId();
             int value = block.getValue();
-            if (!ids.contains(id) && this.value == value) {
+            if (!clickedList.contains(block) && this.value == value && value != 0) {
                 return true;
             }
         }
