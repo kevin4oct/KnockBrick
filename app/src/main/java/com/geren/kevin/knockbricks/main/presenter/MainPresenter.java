@@ -54,9 +54,22 @@ public class MainPresenter {
         for (int i = 0; i < dataSize; i++) {
             for (int j = 0; j < dataSize; j++) {
                 nowData[i][j].setValue(baseData[i][j].getValue());
+                lastData[i][j].setValue(baseData[i][j].getValue());
             }
         }
         activity.setData(nowData);
+
+//        StringBuilder dataBuilder = new StringBuilder();
+//        StringBuilder nowBuilder = new StringBuilder();
+//        //显示数据
+//        for (int i = 0; i < dataSize; i++) {
+//            for (int j = 0; j < dataSize; j++) {
+//                dataBuilder.append(baseData[i][j].toString());
+//                nowBuilder.append(nowData[i][j].toString());
+//            }
+//        }
+//        Log.e(TAG, "data="+dataBuilder.toString() );
+//        Log.e(TAG, "nowData="+nowBuilder.toString() );
     }
 
     //恢复上一步
@@ -72,67 +85,81 @@ public class MainPresenter {
     //敲击
     public void knock(Block block) {
         //记录上一步
-        for (int i = 0; i < dataSize; i++) {
-            for (int j = 0; j < dataSize; j++) {
-                lastData[i][j].setValue(nowData[i][j].getValue());
+        if (block.getValue() != 0) {
+            for (int i = 0; i < dataSize; i++) {
+                for (int j = 0; j < dataSize; j++) {
+                    lastData[i][j].setValue(nowData[i][j].getValue());
+                }
             }
         }
-//
+
         getIds(block);
+        activity.setClickHint(clickedList);
         drawBlack();
-
-//        setRow();
-
+        moveBlock();
         activity.setData(nowData);
 
     }
 
-    //将value==0的放在最上边去
-    private void setRow() {
+    //移动砖块
+    private void moveBlock() {
+
+        //移动行
         for (int i = 0; i < clickedList.size(); i++) {
-// TODO: 2018/12/4
             Block block = clickedList.get(i);
             int x = block.getX();
             int y = block.getY();
-            for (int j = 0; j <= y; j++) {
-                if (j < y) {
-                    nowData[x][j].setValue(nowData[x][j + 1].getValue());
-                } else {
-                    int m = 0;
-                    while (true) {
-                        int value = nowData[x][m].getValue();
-                        if (value != 0) {
-                            nowData[x][m].setValue(0);
-                            break;
-                        }
-                        m++;
-                    }
+            int temp = 0;
+            for (int j = y; j >= 0; j--) {
+                if (j == 0) {
+                    nowData[x][j].setValue(temp);
+                    continue;
+                }
+                if (j == y) {
+                    temp = block.getValue();
+                }
+                int blo = 0;
+                if (j - 1 >= 0) {
+                    blo = nowData[x][j].getValue();
+                    nowData[x][j].setValue(nowData[x][j - 1].getValue());
+                    nowData[x][j - 1].setValue(blo);
                 }
             }
-
         }
+
+        // TODO: 2018/12/5 移动列
+
+
+
     }
 
-    //测试，将ids中的black弄黑
+    //将ids中的black弄黑
     private void drawBlack() {
-        for (int i = 0; i < dataSize; i++) {
-            for (int j = 0; j < dataSize; j++) {
-                for (int k = 0; k < clickedList.size(); k++) {
-                    int id = clickedList.get(k).getId();
-                    if (nowData[i][j].getId() == id) {
-                        nowData[i][j].setValue(0);
-                    }
-                }
-            }
+        //
+        for (int i = 0; i < clickedList.size(); i++) {
+            Block block = clickedList.get(i);
+            nowData[block.getX()][block.getY()].setValue(0);
         }
     }
 
-
-    //获取周围相同value的id集合
+    //获取周围相同value的集合
     private void getIds(Block block) {
         clickedList.clear();
         value = block.getValue();
-        digui(block);
+        digui(block);//找到颜色块
+        //排序
+        for (int i = 0; i < clickedList.size(); i++) {
+            for (int j = 0; j < clickedList.size() - i - 1; j++) {
+                Block blo_a = clickedList.get(j);
+                Block blo_b = clickedList.get(j + 1);
+                Block temp = null;
+                if (blo_a.getY() > blo_b.getY()) {
+                    temp = blo_a;
+                    clickedList.set(j, clickedList.get(j + 1));
+                    clickedList.set(j + 1, temp);
+                }
+            }
+        }
     }
 
     private void digui(Block block) {
@@ -165,10 +192,10 @@ public class MainPresenter {
                 clickedList.add(leftBlock);
             }
         }
-        if (leftBlock != null) {
+        if (rightBlock != null) {
             isR = shoudAdd(rightBlock);
             if (isR) {
-                clickedList.add(leftBlock);
+                clickedList.add(rightBlock);
             }
         }
         //递归
@@ -191,6 +218,7 @@ public class MainPresenter {
         if (block != null) {
             int value = block.getValue();
             if (!clickedList.contains(block) && this.value == value && value != 0) {
+//                Log.e("添加么？", "this.value=" + value + ",block=" + block);
                 return true;
             }
         }

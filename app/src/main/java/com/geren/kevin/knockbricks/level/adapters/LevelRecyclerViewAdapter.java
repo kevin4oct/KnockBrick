@@ -3,11 +3,10 @@ package com.geren.kevin.knockbricks.level.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.geren.kevin.knockbricks.R;
 
@@ -16,8 +15,9 @@ import java.util.List;
 
 public class LevelRecyclerViewAdapter extends RecyclerView.Adapter<LevelRecyclerViewAdapter.LevelRecyclerViewViewHolder> implements View.OnClickListener {
 
-    public static final String TAG = LevelRecyclerViewViewHolder.class.getSimpleName();
-    private List<String> levelList;
+    public static final String TAG = "level适配器";
+
+    private List<Integer> levelList;
     private RecyclerView myRecycler;
     private Context context;
     private LayoutInflater inflater;
@@ -34,15 +34,16 @@ public class LevelRecyclerViewAdapter extends RecyclerView.Adapter<LevelRecycler
     @Override
     public LevelRecyclerViewViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = inflater.inflate(R.layout.item_level, viewGroup, false);
-        view.setOnClickListener(this);
+//        view.setOnClickListener(this);
+        view.findViewById(R.id.btn_item_level).setOnClickListener(this);
         return new LevelRecyclerViewViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull LevelRecyclerViewViewHolder levelRecyclerViewViewHolder, int i) {
-        String s = levelList.get(i);
-        TextView tv = levelRecyclerViewViewHolder.tv;
-        tv.setText(s);
+        Integer position = levelList.get(i);
+        Button btn = levelRecyclerViewViewHolder.btn;
+        btn.setText("第" + (position + 1) + "关");
     }
 
     @Override
@@ -50,7 +51,7 @@ public class LevelRecyclerViewAdapter extends RecyclerView.Adapter<LevelRecycler
         return levelList.size();
     }
 
-    public void refresh(List<String> list) {
+    public void refresh(List<Integer> list) {
         if (list != null && list.size() > 0) {
             this.levelList.clear();
             this.levelList.addAll(list);
@@ -64,7 +65,8 @@ public class LevelRecyclerViewAdapter extends RecyclerView.Adapter<LevelRecycler
 
     @Override
     public void onClick(View v) {
-        int position = myRecycler.getChildAdapterPosition(v);
+        ViewGroup parent = (ViewGroup) v.getParent();
+        int position = myRecycler.getChildAdapterPosition(parent);
         if (listener != null) {
             listener.levelAdapterClicked(position);
         }
@@ -75,11 +77,11 @@ public class LevelRecyclerViewAdapter extends RecyclerView.Adapter<LevelRecycler
     }
 
     public class LevelRecyclerViewViewHolder extends RecyclerView.ViewHolder {
-        TextView tv;
+        Button btn;
 
         public LevelRecyclerViewViewHolder(@NonNull View itemView) {
             super(itemView);
-            tv = itemView.findViewById(R.id.tv_item_level);
+            btn = itemView.findViewById(R.id.btn_item_level);
         }
 
     }

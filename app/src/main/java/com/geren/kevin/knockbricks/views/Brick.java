@@ -18,7 +18,8 @@ public class Brick extends View {
 
     private Block block;
 
-    private int[] colors = {Color.BLACK, Color.GREEN, Color.YELLOW, Color.BLUE, Color.RED, Color.MAGENTA};
+    private int[] colors = {0x00FFFFFF, Color.GREEN, Color.YELLOW, Color.BLUE, Color.RED, Color.MAGENTA,
+            0xFF006000, 0xFF000079, 0xFF5B4B00, 0xFFF75000, 0xFF949449};
 
     private Paint mPaint;
 

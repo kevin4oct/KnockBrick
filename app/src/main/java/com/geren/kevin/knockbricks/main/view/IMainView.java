@@ -2,12 +2,13 @@ package com.geren.kevin.knockbricks.main.view;
 
 import com.geren.kevin.knockbricks.main.bean.Block;
 
-public interface IMainView {
+import java.util.List;
 
-    //初始化
-//    void initView(Block[][] data);
+public interface IMainView {
 
     //重置
     void setData(Block[][] data);
+
+    void setClickHint(List<Block> list);
 
 }

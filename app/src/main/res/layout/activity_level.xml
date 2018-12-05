@@ -3,12 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".level.view.LevelActivity">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:text="请选择关卡" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_level"

@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.geren.kevin.knockbricks.main.bean.Block;
-import com.geren.kevin.knockbricks.utils.TransformUtils;
 
 /**
  * 棋盘
@@ -71,28 +70,23 @@ public class Chessboard extends ViewGroup implements View.OnClickListener {
         int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
         int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
         this.rowWith = sizeWidth > sizeHeight ? sizeHeight : sizeWidth;
-        this.boxWidth = ((Float) ((rowWith - ((float) TransformUtils.px2dip(context, mPaint.getStrokeWidth()))) / rowNumber)).intValue();
+        this.boxWidth = this.rowWith / rowNumber;
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int childCount = getChildCount();
         if (childCount > 0) {
-            Log.e(TAG, "childCount= " + childCount);
             for (int i = 0; i < rowNumber; i++) {//行
                 for (int j = 0; j < rowNumber; j++) {//列
                     int index = rowNumber * j + i;
                     Log.i(TAG, "rowNumber=" + rowNumber + ",i=" + i + ",j=" + j + ",我是卡片，我的下标为》》》" + index);
                     Brick brick = (Brick) getChildAt(index);
-//                    brick.setLeft(108 * j);
-//                    brick.setTop(108 * i);
-//                    brick.setRight(108 * (j + 1));
-//                    brick.setBottom(108 * (i + 1));
                     //
-                    brick.setTop(108 * i);
-                    brick.setBottom(108 * (i + 1));
-                    brick.setLeft(108 * j);
-                    brick.setRight(108 * (j + 1));
+                    brick.setTop(boxWidth * i);
+                    brick.setBottom(boxWidth * (i + 1));
+                    brick.setLeft(boxWidth * j);
+                    brick.setRight(boxWidth * (j + 1));
 
                     brick.setOnClickListener(this);
                 }
