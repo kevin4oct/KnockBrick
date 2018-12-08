@@ -2,6 +2,7 @@ package com.geren.kevin.knockbricks.main.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -27,12 +28,19 @@ public class MainActivity extends AppCompatActivity
     private Chessboard chessboard;
 
     int level;//关卡
+    int highScore;//最高分
+    int currentScore;//当前分
+    int score;//本次分
     private int dataSize = 1;//数组的大小
     private int dataNumber = 1;//数据类型数量
+
     private Button btn_hummer;
     private Button btn_last;
     private TextView tv_hint;
     private TextView tv_clicked;
+    private TextView tv_highScore;
+    private TextView tv_score;
+    private TextView tv_currentScore;
 
     //提供Intent
     public static Intent getMyIntent(Context context, int level) {
@@ -59,11 +67,14 @@ public class MainActivity extends AppCompatActivity
         chessboard = findViewById(R.id.chessbord);
         tv = findViewById(R.id.tv_main);
         tv_hint = findViewById(R.id.tv_main_hint);
-        tv_clicked = (TextView) findViewById(R.id.tv_main_clickhint);
+        tv_clicked = findViewById(R.id.tv_main_clickhint);
         btn_hummer = findViewById(R.id.btn_main_hammer);
         btn_last = findViewById(R.id.btn_main_last);
         btn_reset = findViewById(R.id.btn_main_reset);
         tv.setText("第" + level + "关");
+        tv_highScore = findViewById(R.id.tv_main_highScore);
+        tv_currentScore = findViewById(R.id.tv_main_currentScore);
+        tv_score = findViewById(R.id.tv_main_score);
     }
 
     //设置监听
@@ -82,18 +93,22 @@ public class MainActivity extends AppCompatActivity
 
     //初始化数据
     private void initData() {
-        if (level < 5) {
-            dataSize = 10;//列数
-            dataNumber = level;//砖块种类数
-        } else if (level < 10) {
-            dataSize = 10;
-            dataNumber = level;
-        } else {
-            dataSize = level;
-            dataNumber = 10;
-        }
+//        if (level < 5) {
+//            dataSize = 10;//列数
+//            dataNumber = level;//砖块种类数
+//        } else if (level < 10) {
+//            dataSize = 10;
+//            dataNumber = level;
+//        } else {
+//            dataSize = level;
+//            dataNumber = 10;
+//        }
+        dataSize = 10;
+        dataNumber = 5;
+        highScore = getHighScore();
+        tv_highScore.setText("" + highScore);
         presenter = new MainPresenter(this);
-        presenter.initData(dataSize, dataNumber);
+        presenter.initData(level, dataSize, dataNumber);
     }
 
     //设置显示数据
@@ -110,6 +125,24 @@ public class MainActivity extends AppCompatActivity
             builder.append(list.get(i).toString() + "\r\n");
         }
         tv_hint.setText(builder.toString());
+    }
+
+    @Override
+    public void setScore(int score) {
+        this.score = score;
+        tv_score.setText("" + score);
+        this.currentScore += score;
+        tv_currentScore.setText("" + currentScore);
+        if (currentScore > highScore) {
+            highScore = currentScore;
+            tv_highScore.setText("" + highScore);
+            saveHighScore(highScore);
+        }
+    }
+
+    @Override
+    public void cannotMove() {
+
     }
 
     @Override
@@ -131,5 +164,24 @@ public class MainActivity extends AppCompatActivity
     public void chessboardClicked(Block block) {
         tv_clicked.setText("点击的Block\r\n" + block.toString());
         presenter.knock(block);
+    }
+
+    public void saveHighScore(int score) {
+        //MODE_PRIVATE
+        //MODE_WORLD_READABLE
+        //MODE_WORLD_WRITEABLE
+        //MODE_MULTI_PROCESS
+        SharedPreferences preferences = getSharedPreferences("level" + level, Context.MODE_PRIVATE);
+        //1.Call edit() to get a SharedPreferences.Editor.
+        SharedPreferences.Editor editor = preferences.edit();
+        //2. Add values with methods such as putBoolean() and putString().
+        editor.putInt("highScore", highScore);
+        //3 Commit the new values with commit()
+        editor.commit();
+    }
+
+    public int getHighScore() {
+        SharedPreferences preferences = getSharedPreferences("level" + level, Context.MODE_PRIVATE);
+        return preferences.getInt("highScore", 0);
     }
 }

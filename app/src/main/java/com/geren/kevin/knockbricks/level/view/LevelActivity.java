@@ -39,7 +39,7 @@ public class LevelActivity extends AppCompatActivity
         adapter = new LevelRecyclerViewAdapter(this, myRecycler);
         myRecycler.setAdapter(adapter);
         list = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 16; i++) {
             list.add(i);
         }
         adapter.refresh(list);

@@ -1,34 +1,55 @@
 package com.geren.kevin.knockbricks.main.presenter;
 
+import android.util.Log;
+
 import com.geren.kevin.knockbricks.main.bean.Block;
 import com.geren.kevin.knockbricks.main.view.IMainView;
 import com.geren.kevin.knockbricks.main.view.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class MainPresenter {
 
+    private int[][] levelData = {
+            {3, 3, 4, 5, 3, 2, 5, 3, 1, 1, 3, 5, 2, 1, 5, 5, 2, 2, 1, 3, 3, 5, 3, 3, 1, 2, 2, 3, 1, 3, 2, 5, 5, 1, 4, 1, 3, 3, 2, 3, 4, 1, 3, 4, 3, 3, 5, 2, 5, 1, 1, 2, 3, 2, 3, 3, 1, 1, 4, 2, 5, 4, 2, 4, 1, 5, 3, 4, 1, 1, 2, 3, 2, 1, 5, 5, 2, 3, 4, 2, 4, 5, 2, 5, 1, 5, 3, 2, 4, 4, 5, 3, 1, 1, 3, 3, 3, 1, 4, 3},
+            {2, 1, 4, 3, 1, 3, 4, 3, 3, 5, 5, 4, 4, 4, 2, 4, 5, 5, 3, 4, 1, 4, 2, 2, 5, 1, 2, 5, 3, 4, 1, 4, 4, 2, 3, 5, 1, 5, 2, 2, 1, 5, 4, 1, 5, 2, 3, 4, 1, 3, 5, 3, 5, 4, 1, 2, 3, 3, 4, 3, 4, 3, 4, 3, 2, 3, 1, 1, 3, 3, 4, 2, 3, 4, 5, 2, 4, 5, 3, 5, 1, 4, 1, 3, 5, 3, 4, 3, 2, 1, 4, 5, 5, 1, 4, 4, 2, 4, 4, 2},
+            {2, 3, 3, 3, 3, 1, 3, 1, 1, 4, 2, 3, 2, 2, 2, 5, 2, 1, 3, 2, 1, 3, 1, 5, 2, 2, 1, 4, 2, 4, 4, 1, 3, 5, 4, 2, 3, 2, 4, 1, 2, 4, 5, 4, 2, 2, 5, 1, 5, 3, 5, 1, 1, 2, 2, 1, 2, 3, 2, 3, 3, 2, 5, 2, 3, 3, 4, 3, 5, 4, 2, 4, 5, 4, 1, 1, 5, 1, 5, 1, 5, 1, 3, 2, 2, 1, 5, 3, 3, 4, 3, 1, 5, 5, 1, 4, 2, 2, 2, 4},
+            {4, 1, 5, 5, 5, 1, 3, 3, 2, 5, 4, 1, 3, 4, 1, 5, 2, 3, 5, 4, 5, 2, 5, 4, 1, 1, 5, 1, 2, 3, 1, 1, 1, 2, 3, 2, 4, 5, 1, 4, 4, 3, 4, 1, 3, 5, 1, 5, 3, 1, 1, 4, 5, 5, 5, 2, 2, 2, 2, 3, 2, 1, 4, 3, 4, 4, 2, 1, 2, 5, 4, 4, 4, 3, 4, 3, 4, 1, 2, 1, 3, 3, 3, 5, 5, 5, 3, 4, 4, 3, 3, 2, 4, 5, 4, 3, 3, 5, 1, 3},
+            {2, 3, 4, 3, 2, 3, 4, 1, 1, 4, 5, 4, 4, 3, 1, 1, 1, 1, 2, 4, 3, 2, 3, 1, 3, 3, 5, 3, 3, 5, 3, 1, 4, 3, 3, 1, 2, 5, 3, 4, 2, 1, 3, 3, 1, 4, 5, 1, 4, 2, 3, 4, 5, 4, 1, 1, 5, 4, 3, 1, 5, 5, 2, 5, 2, 2, 2, 2, 3, 2, 1, 1, 3, 5, 4, 4, 1, 1, 1, 2, 2, 1, 3, 3, 3, 4, 4, 3, 5, 4, 5, 4, 3, 1, 1, 2, 1, 1, 3, 3},
+            {4, 4, 5, 3, 4, 3, 5, 4, 4, 1, 3, 1, 3, 2, 4, 1, 4, 5, 1, 2, 1, 1, 4, 4, 3, 4, 1, 2, 5, 5, 2, 5, 3, 1, 2, 5, 2, 1, 1, 1, 4, 4, 1, 3, 3, 5, 5, 2, 4, 2, 4, 3, 2, 3, 2, 1, 5, 2, 1, 1, 4, 5, 5, 1, 3, 5, 2, 3, 4, 1, 5, 4, 1, 3, 5, 1, 4, 2, 3, 2, 1, 1, 5, 1, 3, 4, 5, 1, 1, 4, 4, 4, 1, 3, 5, 3, 2, 2, 3, 4},
+            {5, 2, 1, 4, 4, 1, 4, 4, 2, 4, 5, 1, 1, 4, 3, 5, 5, 1, 1, 4, 2, 5, 2, 5, 5, 2, 5, 1, 1, 2, 3, 1, 1, 2, 4, 2, 3, 5, 3, 1, 1, 5, 3, 1, 1, 1, 2, 1, 2, 2, 4, 2, 2, 4, 5, 5, 5, 3, 4, 3, 2, 1, 1, 3, 5, 2, 1, 3, 2, 3, 1, 1, 5, 2, 3, 2, 4, 1, 1, 3, 4, 4, 4, 4, 3, 5, 2, 4, 2, 1, 4, 2, 4, 4, 1, 1, 5, 4, 5, 2},
+            {1, 5, 2, 1, 3, 4, 3, 3, 2, 3, 4, 2, 5, 3, 2, 5, 2, 1, 2, 1, 3, 4, 1, 3, 1, 2, 3, 3, 2, 3, 5, 1, 5, 4, 2, 5, 5, 1, 3, 2, 4, 3, 3, 2, 5, 5, 5, 5, 3, 4, 3, 2, 3, 1, 2, 5, 2, 1, 1, 5, 3, 5, 1, 4, 1, 2, 1, 1, 3, 2, 2, 1, 4, 4, 5, 5, 5, 5, 3, 1, 1, 5, 5, 1, 5, 4, 3, 1, 5, 5, 2, 4, 3, 3, 4, 4, 2, 1, 2, 3},
+            {2, 5, 3, 3, 3, 5, 2, 3, 5, 1, 3, 4, 1, 4, 1, 1, 3, 3, 3, 4, 2, 3, 4, 4, 2, 4, 5, 1, 5, 2, 4, 5, 2, 4, 1, 3, 5, 4, 5, 2, 2, 4, 1, 5, 3, 2, 4, 1, 2, 5, 4, 5, 3, 1, 3, 3, 2, 2, 3, 3, 4, 1, 2, 2, 5, 4, 5, 4, 1, 5, 3, 5, 2, 3, 5, 5, 4, 5, 2, 5, 2, 4, 4, 5, 4, 4, 1, 5, 3, 2, 2, 4, 2, 1, 4, 4, 2, 4, 4, 3},
+            {1, 3, 3, 1, 4, 5, 4, 4, 1, 3, 4, 4, 4, 5, 4, 4, 2, 2, 2, 1, 2, 4, 2, 3, 2, 5, 1, 1, 5, 2, 5, 4, 4, 5, 5, 2, 2, 2, 3, 3, 5, 1, 3, 3, 4, 5, 2, 2, 4, 4, 5, 5, 1, 5, 1, 4, 1, 2, 5, 5, 2, 4, 5, 2, 3, 1, 2, 1, 2, 5, 3, 5, 3, 1, 2, 2, 1, 2, 1, 2, 4, 4, 1, 1, 4, 1, 3, 4, 2, 5, 1, 2, 1, 5, 3, 1, 4, 5, 4, 2},
+            {3, 4, 4, 1, 1, 4, 3, 1, 5, 2, 4, 2, 5, 1, 3, 5, 2, 1, 5, 2, 5, 1, 1, 1, 3, 5, 4, 3, 4, 5, 2, 1, 2, 2, 3, 5, 3, 5, 2, 4, 5, 1, 4, 3, 5, 5, 3, 2, 1, 1, 3, 1, 5, 3, 1, 2, 5, 3, 1, 1, 4, 1, 4, 2, 2, 1, 4, 3, 4, 5, 2, 1, 5, 1, 1, 1, 1, 5, 4, 2, 1, 3, 5, 3, 4, 2, 1, 1, 5, 4, 4, 5, 1, 5, 2, 1, 5, 5, 5, 5},
+            {2, 4, 2, 4, 1, 5, 4, 5, 3, 4, 4, 4, 5, 3, 1, 5, 3, 1, 1, 3, 2, 2, 5, 4, 1, 2, 1, 2, 4, 4, 3, 4, 4, 3, 4, 3, 1, 3, 4, 2, 2, 4, 2, 5, 5, 1, 2, 2, 1, 2, 5, 2, 2, 2, 2, 1, 3, 1, 1, 1, 1, 2, 3, 1, 2, 2, 5, 1, 5, 3, 5, 5, 5, 1, 3, 1, 3, 5, 5, 2, 2, 5, 2, 3, 2, 1, 2, 2, 4, 1, 2, 1, 1, 5, 3, 4, 3, 5, 1, 1},
+            {2, 2, 1, 1, 3, 5, 5, 5, 2, 1, 4, 4, 2, 5, 3, 3, 4, 5, 5, 1, 5, 5, 2, 5, 3, 2, 4, 1, 2, 3, 4, 4, 2, 4, 4, 5, 3, 4, 5, 4, 2, 4, 2, 3, 3, 1, 3, 5, 5, 2, 4, 2, 3, 1, 2, 3, 2, 3, 2, 5, 2, 1, 4, 3, 2, 5, 2, 1, 2, 3, 3, 5, 5, 3, 5, 5, 5, 3, 4, 2, 1, 5, 2, 5, 2, 2, 3, 3, 4, 2, 1, 3, 1, 1, 1, 5, 5, 2, 1, 3},
+            {3, 5, 2, 3, 1, 3, 4, 2, 3, 3, 1, 5, 2, 5, 4, 5, 5, 2, 2, 5, 5, 1, 1, 3, 3, 5, 5, 5, 2, 3, 4, 2, 3, 5, 4, 2, 4, 5, 1, 2, 1, 1, 4, 3, 5, 3, 2, 3, 3, 3, 1, 2, 3, 1, 1, 1, 4, 2, 5, 5, 1, 5, 4, 5, 3, 1, 5, 3, 1, 2, 3, 3, 2, 5, 5, 2, 4, 2, 3, 3, 3, 5, 4, 4, 4, 1, 4, 2, 2, 4, 2, 4, 4, 3, 4, 2, 1, 3, 2, 4},
+            {5, 4, 3, 5, 1, 1, 1, 2, 3, 1, 1, 5, 4, 2, 3, 5, 1, 2, 4, 2, 3, 2, 3, 5, 5, 4, 5, 3, 5, 4, 2, 2, 5, 5, 4, 2, 1, 3, 2, 2, 1, 3, 3, 5, 3, 3, 2, 2, 1, 3, 4, 3, 4, 3, 3, 4, 1, 4, 5, 5, 4, 3, 5, 3, 2, 3, 5, 1, 1, 5, 3, 4, 5, 3, 2, 4, 3, 3, 5, 1, 4, 3, 3, 1, 1, 4, 4, 2, 4, 5, 4, 5, 2, 5, 3, 1, 4, 4, 1, 3},
+            {2, 1, 4, 1, 3, 3, 2, 1, 4, 1, 2, 5, 3, 4, 4, 2, 5, 2, 3, 3, 2, 3, 1, 2, 5, 2, 4, 1, 1, 2, 2, 5, 4, 3, 1, 3, 2, 2, 2, 1, 4, 5, 4, 2, 5, 2, 5, 1, 4, 4, 1, 2, 2, 4, 4, 4, 5, 2, 5, 1, 3, 4, 4, 1, 2, 5, 3, 5, 4, 3, 3, 5, 2, 3, 2, 2, 2, 3, 3, 1, 5, 1, 4, 1, 5, 1, 5, 3, 2, 2, 1, 5, 1, 4, 4, 2, 4, 1, 2, 3}
+    };
+
     public static final String TAG = "MainPresenter";
-    private IMainView activity;
+    private IMainView iView;
 
     private Block[][] baseData;//初始数据集合
     private Block[][] lastData;//上一步数据集合
     private Block[][] nowData;//当前数据集合
 
+    private int level;//关卡
     private int dataSize;//数组的大小
     private int dataNumber;//数据类型数量
 
     private List<Block> clickedList = new ArrayList<>();//点击后记录颜色块的id的容器
     private int value;//点击的块的value
 
-    public MainPresenter(MainActivity activity) {
-        this.activity = activity;
+    public MainPresenter(MainActivity iView) {
+        this.iView = iView;
     }
 
     //初始化数据
-    public void initData(int dataSize, int dataNumber) {
+    public void initData(int level, int dataSize, int dataNumber) {
         this.dataSize = dataSize;
         this.dataNumber = dataNumber;
         baseData = new Block[dataSize][dataSize];
@@ -37,7 +58,8 @@ public class MainPresenter {
         for (int x = 0; x < dataSize; x++) {
             for (int y = 0; y < dataSize; y++) {
                 int id = x * dataSize + y;
-                int value = new Random().nextInt(dataNumber) + 1;
+//                int value = new Random().nextInt(dataNumber) + 1;
+                int value = levelData[level][id];
                 Block block = new Block(id, x, y, value);
                 Block block1 = new Block(id, x, y, value);
                 Block block2 = new Block(id, x, y, value);
@@ -46,7 +68,19 @@ public class MainPresenter {
                 nowData[x][y] = block2;
             }
         }
-        activity.setData(nowData);
+
+        Log.e(TAG, "dataSize=" + dataSize);
+
+        StringBuilder lala = new StringBuilder();
+        for (int i = 0; i < dataSize; i++) {
+            Log.e(TAG, "index=" + i);
+            for (int j = 0; j < dataSize; j++) {
+//                Log.e(TAG, baseData[i][j] + ",");
+                lala.append(baseData[i][j].getValue() + ",");
+            }
+        }
+        Log.e(TAG, "initData>>>\r\n" + lala.toString());
+        iView.setData(nowData);
     }
 
     //重置数据
@@ -57,7 +91,7 @@ public class MainPresenter {
                 lastData[i][j].setValue(baseData[i][j].getValue());
             }
         }
-        activity.setData(nowData);
+        iView.setData(nowData);
 
 //        StringBuilder dataBuilder = new StringBuilder();
 //        StringBuilder nowBuilder = new StringBuilder();
@@ -79,7 +113,7 @@ public class MainPresenter {
                 nowData[i][j].setValue(lastData[i][j].getValue());
             }
         }
-        activity.setData(nowData);
+        iView.setData(nowData);
     }
 
     //敲击
@@ -94,11 +128,35 @@ public class MainPresenter {
         }
 
         getIds(block);
-        activity.setClickHint(clickedList);
+        iView.setClickHint(clickedList);
         drawBlack();
         moveBlock();
-        activity.setData(nowData);
+        if (!isMove()) {//
+            iView.cannotMove();
+            return;
+        }
+        getScore();
+        iView.setData(nowData);
+    }
 
+    //获得分数
+    public void getScore() {
+        int score = 0;
+        int size = clickedList.size();
+        if (size > 1 && size <= 3) {
+            score = 10 * size;
+        } else if (size > 3 && size <= 10) {
+            score = 20 * size;
+        } else if (size > 10) {
+            score = 30 * size;
+        }
+        iView.setScore(score);
+    }
+
+    //是否还有可消除的方块
+    public boolean isMove() {
+
+        return true;
     }
 
     //移动砖块
@@ -127,8 +185,28 @@ public class MainPresenter {
             }
         }
 
-        // TODO: 2018/12/5 移动列
+        // 移动列
+        for (int i = 0; i < dataSize; i++) {
+            int count = 0;
+            for (int j = 0; j < dataSize; j++) {
+                int value = nowData[i][j].getValue();
+                if (value != 0) {
+                    count++;
+                }
+            }
+            if (count == 0) {//整列消除了，移动
+                for (int m = i; m < dataSize; m++) {
+                    for (int n = 0; n < dataSize; n++) {
+                        if (m + 1 < dataSize) {
+                            nowData[m][n].setValue(nowData[m + 1][n].getValue());
+                        } else {
+                            nowData[m][n].setValue(0);
+                        }
 
+                    }
+                }
+            }
+        }
 
 
     }
